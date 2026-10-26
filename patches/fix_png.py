@@ -1,7 +1,6 @@
 import os
 import base64
 
-# 100% валидный 1x1 прозрачный PNG, закодированный в Base64
 valid_png_base64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
 valid_png_bytes = base64.b64decode(valid_png_base64)
 
@@ -15,14 +14,12 @@ def fix_invalid_pngs(directory):
                 try:
                     with open(filepath, 'rb') as f:
                         header = f.read(8)
-                        # Если файл не начинается с сигнатуры PNG
                         if header != b'\x89PNG\r\n\x1a\n':
-                            # Перезаписываем его валидным PNG
                             with open(filepath, 'wb') as wf:
                                 wf.write(valid_png_bytes)
                             fixed_count += 1
-                except Exception as e:
-                    print(f"Ошибка при обработке {filepath}: {e}")
+                except Exception:
+                    pass
     print(f"Всего исправлено: {fixed_count}")
 
 if __name__ == "__main__":
