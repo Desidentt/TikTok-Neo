@@ -10,18 +10,23 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v5
+      uses: actions/checkout@v4
 
     - name: Set up JDK 17
-      uses: actions/setup-java@v5
+      uses: actions/setup-java@v4
       with:
         distribution: 'zulu'
         java-version: '17'
 
-    - name: Install tools
+    - name: Install tools (without apktool)
       run: |
         sudo apt-get update
-        sudo apt-get install -y apktool zipalign python3 wget
+        sudo apt-get install -y zipalign python3 wget
+
+    - name: Download latest Apktool
+      run: |
+        # Скачиваем свежую версию apktool (2.9.3)
+        wget https://github.com/iBotPeaches/Apktool/releases/download/v2.9.3/apktool_2.9.3.jar -O apktool.jar
 
     - name: Increase Swap Space
       run: |
@@ -41,8 +46,6 @@ jobs:
         keytool -genkey -v -keystore release.keystore -alias neo -keyalg RSA -keysize 2048 -validity 10000 -storepass 123456 -keypass 123456 -dname "CN=TikTok Neo, O=Modding, C=US"
 
     - name: Run Build Script
-      env:
-        APKTOOL_JAVA_OPTS: "-Xmx8G -Dfile.encoding=utf-8"
       run: |
         chmod +x scripts/build.sh
         ./scripts/build.sh
@@ -52,7 +55,7 @@ jobs:
         apksigner sign --ks release.keystore --ks-pass pass:123456 --key-pass pass:123456 --ks-key-alias neo --out TikTok_Neo_Signed.apk TikTok_Neo_Aligned.apk
 
     - name: Upload APK and Keystore
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v4
       with:
         name: TikTok-Neo-Files
         path: |
