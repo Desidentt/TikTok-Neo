@@ -18,10 +18,10 @@ jobs:
         distribution: 'zulu'
         java-version: '17'
 
-    - name: Install tools (без apktool)
+    - name: Install tools
       run: |
         sudo apt-get update
-        sudo apt-get install -y zipalign python3 wget
+        sudo apt-get install -y python3 wget
 
     - name: Download latest Apktool
       run: |
@@ -50,18 +50,11 @@ jobs:
         chmod +x scripts/build.sh
         ./scripts/build.sh
 
-    - name: Zipalign APK
-      run: |
-        zipalign -v 4 TikTok_Neo_Unsigned.apk TikTok_Neo_Aligned.apk
-
     - name: Sign APK (v1, v2, v3)
       run: |
         APKSIGNER_PATH=$(find $ANDROID_HOME/build-tools -name apksigner | sort -r | head -n 1)
-        if [ -z "$APKSIGNER_PATH" ]; then
-          echo "Ошибка: apksigner не найден!"
-          exit 1
-        fi
         
+        # Подписываем напрямую, apksigner сам сделает нужное выравнивание для v2/v3
         $APKSIGNER_PATH sign \
           --ks release.keystore \
           --ks-pass pass:123456 \
@@ -70,7 +63,7 @@ jobs:
           --v1-signing-enabled true \
           --v2-signing-enabled true \
           --v3-signing-enabled true \
-          --out TikTok_Neo_Signed.apk TikTok_Neo_Aligned.apk
+          --out TikTok_Neo_Signed.apk TikTok_Neo_Unsigned.apk
 
     - name: Upload APK and Keystore
       uses: actions/upload-artifact@v4
