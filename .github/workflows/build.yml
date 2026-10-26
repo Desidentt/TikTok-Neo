@@ -65,13 +65,22 @@ jobs:
 
     - name: Bypass Signature Verification (nkstool)
       run: |
-        # nkstool ищет src.apk, поэтому переименовываем предварительно подписанный APK
+        # nkstool ищет src.apk
         mv TikTok_Neo_PreSigned.apk src.apk
         
         wget https://github.com/L-JINBIN/ApkSignatureKiller/raw/master/nkstool.jar
-        wget https://github.com/L-JINBIN/ApkSignatureKiller/raw/master/config.txt
         
-        # Запускаем nkstool с явным разрешением доступа к внутренним пакетам JDK
+        # Создаем config.txt с нашими данными от release.keystore
+        cat <<EOF > config.txt
+        apk=src.apk
+        out=out.apk
+        keystore=release.keystore
+        storepass=123456
+        alias=neo
+        keypass=123456
+        EOF
+        
+        # Запускаем nkstool с флагами доступа к JDK
         java \
           --add-exports java.base/sun.security.pkcs=ALL-UNNAMED \
           --add-exports java.base/sun.security.x509=ALL-UNNAMED \
@@ -81,13 +90,12 @@ jobs:
           --add-opens java.base/java.io=ALL-UNNAMED \
           -jar nkstool.jar
         
-        # Ищем результат работы утилиты
-        if [ -f "src_killer.apk" ]; then
-          mv src_killer.apk TikTok_Neo_Patched.apk
-        elif [ -f "dist.apk" ]; then
-          mv dist.apk TikTok_Neo_Patched.apk
+        # Ищем результат работы (теперь это out.apk)
+        if [ -f "out.apk" ]; then
+          mv out.apk TikTok_Neo_Patched.apk
+          echo "Успешно применен патч подписи!"
         else
-          echo "Ошибка: Выходной файл nkstool не найден!"
+          echo "Ошибка: Выходной файл out.apk не найден!"
           ls -la
           exit 1
         fi
