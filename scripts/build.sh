@@ -3,12 +3,6 @@ set -e
 
 APKTOOL_JAR="apktool.jar"
 
-if [ ! -f "$APKTOOL_JAR" ]; then
-    echo "Ошибка: файл $APKTOOL_JAR не найден в текущей папке!"
-    exit 1
-fi
-echo "Используется apktool: $APKTOOL_JAR"
-
 echo "1. Распаковываем оригинальный TikTok..."
 java -Xmx8G -jar "$APKTOOL_JAR" d original.apk -o tiktok_workspace -f
 
@@ -25,13 +19,13 @@ done
 echo "4. Применяем патчи Smali..."
 python3 patches/remove_ads.py
 
-echo "4.5. Исправляем битые PNG файлы..."
+echo "4.5. Удаляем битые PNG файлы (а не заменяем их)..."
 python3 patches/fix_png.py
 
 echo "4.6. Исправляем битые XML файлы..."
 python3 patches/fix_xml.py
 
-echo "4.7. Очищаем AndroidManifest.xml от некорректных ссылок..."
+echo "4.7. Очищаем AndroidManifest.xml..."
 python3 patches/fix_manifest.py
 
 echo "5. Собираем APK обратно..."
