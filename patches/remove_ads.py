@@ -2,7 +2,6 @@ import os
 import re
 
 def patch_smali_files(directory):
-    print("Поиск и замена рекламных вызовов...")
     search_pattern = r"invoke-virtual \{.*\}, L.*->showAd\(\)V"
     replace_pattern = r"# Реклама отключена"
     patched_count = 0
