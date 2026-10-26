@@ -34,10 +34,7 @@ python3 patches/fix_xml.py
 echo "4.7. Очищаем AndroidManifest.xml от некорректных ссылок..."
 python3 patches/fix_manifest.py
 
-echo "5. Собираем APK обратно (с увеличенным лимитом памяти)..."
+echo "5. Собираем APK обратно..."
 java -Xmx8G -jar "$APKTOOL_JAR" b tiktok_workspace -o TikTok_Neo_Unsigned.apk --use-aapt2
-
-echo "6. Выравниваем APK..."
-zipalign -v -p 4 TikTok_Neo_Unsigned.apk TikTok_Neo_Aligned.apk
 
 echo "Сборка завершена!"
