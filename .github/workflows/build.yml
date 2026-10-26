@@ -38,18 +38,19 @@ jobs:
 
     - name: Download original TikTok APK
       run: |
-        wget -O original.apk "https://github.com/Desidentt/TikTok-Neo/releases/download/v1.0/original.apk"
+        # ВСТАВЬ СЮДА СВОЮ ССЫЛКУ!
+        wget -O original.apk "https://github.com/ТВОЙ_НИК/TikTok-Neo/releases/download/v1.0/original.apk"
 
     - name: Generate Keystore
       run: |
-        keytool -genkey -v -keystore release.keystore -alias neo -keyalg RSA -keysize 2048 -validity 10000 -storepass 123456 -keypass 123456 -dname "CN=TikTok Neo, O=Modding, C=US"
+        # ВАЖНО: используем алиас "test", чтобы он совпадал с дефолтным конфигом nkstool
+        keytool -genkey -v -keystore release.keystore -alias test -keyalg RSA -keysize 2048 -validity 10000 -storepass 123456 -keypass 123456 -dname "CN=TikTok Neo, O=Modding, C=US"
 
     - name: Run Build Script
       run: |
         chmod +x scripts/build.sh
         ./scripts/build.sh
 
-    # --- НОВЫЙ ШАГ: Подписываем APK перед nkstool (с включенной v1 схемой) ---
     - name: Pre-sign APK for nkstool (v1 enabled)
       run: |
         APKSIGNER_PATH=$(find $ANDROID_HOME/build-tools -name apksigner | sort -r | head -n 1)
@@ -57,7 +58,7 @@ jobs:
           --ks release.keystore \
           --ks-pass pass:123456 \
           --key-pass pass:123456 \
-          --ks-key-alias neo \
+          --ks-key-alias test \
           --v1-signing-enabled true \
           --v2-signing-enabled false \
           --v3-signing-enabled false \
@@ -65,22 +66,22 @@ jobs:
 
     - name: Bypass Signature Verification (nkstool)
       run: |
-        # nkstool ищет src.apk
         mv TikTok_Neo_PreSigned.apk src.apk
         
-        # Скачиваем утилиту и оригинальный конфиг
+        # Создаем копию ключа с именем test.keystore
+        cp release.keystore test.keystore
+        
         wget https://github.com/L-JINBIN/ApkSignatureKiller/raw/master/nkstool.jar
         wget https://github.com/L-JINBIN/ApkSignatureKiller/raw/master/config.txt
         
-        # Меняем ВСЕ настройки на наши
-        sed -i 's/^apk=.*/apk=src.apk/' config.txt
-        sed -i 's/^out=.*/out=out.apk/' config.txt
-        sed -i 's/^keystore=.*/keystore=release.keystore/' config.txt
-        sed -i 's/^storepass=.*/storepass=123456/' config.txt
-        sed -i 's/^alias=.*/alias=neo/' config.txt
-        sed -i 's/^keypass=.*/keypass=123456/' config.txt
+        # Заменяем строки, даже если они закомментированы (^#*)
+        sed -i 's/^#*apk=.*/apk=src.apk/' config.txt
+        sed -i 's/^#*out=.*/out=out.apk/' config.txt
+        sed -i 's/^#*keystore=.*/keystore=test.keystore/' config.txt
+        sed -i 's/^#*storepass=.*/storepass=123456/' config.txt
+        sed -i 's/^#*alias=.*/alias=test/' config.txt
+        sed -i 's/^#*keypass=.*/keypass=123456/' config.txt
         
-        # Запускаем nkstool с флагами доступа к JDK
         java \
           --add-exports java.base/sun.security.pkcs=ALL-UNNAMED \
           --add-exports java.base/sun.security.x509=ALL-UNNAMED \
@@ -90,7 +91,6 @@ jobs:
           --add-opens java.base/java.io=ALL-UNNAMED \
           -jar nkstool.jar
         
-        # Забираем результат
         if [ -f "out.apk" ]; then
           mv out.apk TikTok_Neo_Patched.apk
           echo "Успешно применен патч подписи!"
@@ -100,7 +100,6 @@ jobs:
           exit 1
         fi
 
-    # --- ФИНАЛЬНАЯ ПОДПИСЬ (после внедрения обхода) ---
     - name: Final Sign APK
       run: |
         APKSIGNER_PATH=$(find $ANDROID_HOME/build-tools -name apksigner | sort -r | head -n 1)
@@ -108,7 +107,7 @@ jobs:
           --ks release.keystore \
           --ks-pass pass:123456 \
           --key-pass pass:123456 \
-          --ks-key-alias neo \
+          --ks-key-alias test \
           --v1-signing-enabled true \
           --v2-signing-enabled true \
           --v3-signing-enabled true \
