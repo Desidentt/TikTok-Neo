@@ -18,7 +18,7 @@ jobs:
         distribution: 'zulu'
         java-version: '17'
 
-    - name: Install tools (without apktool)
+    - name: Install tools (без apktool)
       run: |
         sudo apt-get update
         sudo apt-get install -y zipalign python3 wget
@@ -30,6 +30,7 @@ jobs:
 
     - name: Increase Swap Space
       run: |
+        # Увеличиваем файл подкачки до 10 ГБ для предотвращения ошибки OutOfMemory
         sudo swapoff -a
         sudo fallocate -l 10G /swapfile
         sudo chmod 600 /swapfile
@@ -39,10 +40,12 @@ jobs:
 
     - name: Download original TikTok APK
       run: |
+        # ВСТАВЬ СЮДА СВОЮ ССЫЛКУ ИЗ РАЗДЕЛА RELEASES!
         wget -O original.apk "https://github.com/Desidentt/TikTok-Neo/releases/download/v1.0/original.apk"
 
     - name: Generate Keystore
       run: |
+        # Генерируем ключ подписи прямо на сервере
         keytool -genkey -v -keystore release.keystore -alias neo -keyalg RSA -keysize 2048 -validity 10000 -storepass 123456 -keypass 123456 -dname "CN=TikTok Neo, O=Modding, C=US"
 
     - name: Run Build Script
@@ -52,7 +55,18 @@ jobs:
 
     - name: Sign APK
       run: |
-        apksigner sign --ks release.keystore --ks-pass pass:123456 --key-pass pass:123456 --ks-key-alias neo --out TikTok_Neo_Signed.apk TikTok_Neo_Aligned.apk
+        # Ищем утилиту apksigner в папке Android SDK
+        APKSIGNER_PATH=$(find $ANDROID_HOME/build-tools -name apksigner | sort -r | head -n 1)
+        
+        if [ -z "$APKSIGNER_PATH" ]; then
+          echo "Ошибка: apksigner не найден в Android SDK!"
+          exit 1
+        fi
+        
+        echo "Используется apksigner: $APKSIGNER_PATH"
+        
+        # Запускаем подпись
+        $APKSIGNER_PATH sign --ks release.keystore --ks-pass pass:123456 --key-pass pass:123456 --ks-key-alias neo --out TikTok_Neo_Signed.apk TikTok_Neo_Aligned.apk
 
     - name: Upload APK and Keystore
       uses: actions/upload-artifact@v4
