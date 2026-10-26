@@ -39,7 +39,7 @@ jobs:
     - name: Download original TikTok APK
       run: |
         # ВСТАВЬ СЮДА СВОЮ ССЫЛКУ!
-        wget -O original.apk "https://github.com/ТВОЙ_НИК/TikTok-Neo/releases/download/v1.0/original.apk"
+        wget -O original.apk "https://github.com/Desidentt/TikTok-Neo/releases/download/v1.0/original.apk"
 
     - name: Generate Keystore
       run: |
