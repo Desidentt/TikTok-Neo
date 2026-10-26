@@ -6,14 +6,14 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 120 # Увеличиваем таймаут на случай долгой сборки
+    timeout-minutes: 120 # Увеличенный таймаут для долгой сборки
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Set up JDK 17
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@v5
       with:
         distribution: 'zulu'
         java-version: '17'
@@ -25,13 +25,11 @@ jobs:
 
     - name: Increase Swap Space
       run: |
-        # Увеличиваем файл подкачки до 10 ГБ
         sudo swapoff -a
         sudo fallocate -l 10G /swapfile
         sudo chmod 600 /swapfile
         sudo mkswap /swapfile
         sudo swapon /swapfile
-        # Проверяем результат
         free -h
 
     - name: Download original TikTok APK
@@ -43,6 +41,8 @@ jobs:
         keytool -genkey -v -keystore release.keystore -alias neo -keyalg RSA -keysize 2048 -validity 10000 -storepass 123456 -keypass 123456 -dname "CN=TikTok Neo, O=Modding, C=US"
 
     - name: Run Build Script
+      env:
+        APKTOOL_JAVA_OPTS: "-Xmx8G -Dfile.encoding=utf-8"
       run: |
         chmod +x scripts/build.sh
         ./scripts/build.sh
@@ -52,7 +52,7 @@ jobs:
         apksigner sign --ks release.keystore --ks-pass pass:123456 --key-pass pass:123456 --ks-key-alias neo --out TikTok_Neo_Signed.apk TikTok_Neo_Aligned.apk
 
     - name: Upload APK and Keystore
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: TikTok-Neo-Files
         path: |
