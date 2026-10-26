@@ -10,7 +10,6 @@ def fix_manifest(workspace_dir):
     with open(manifest_path, 'r', encoding='utf-8') as f:
         content = f.read()
 
-    # Удаляет проблемный атрибут целиком: android:xxx="@123456"
     pattern = r'\s+[\w:]+="@\d+"'
     
     matches = re.findall(pattern, content)
@@ -21,8 +20,6 @@ def fix_manifest(workspace_dir):
         with open(manifest_path, 'w', encoding='utf-8') as f:
             f.write(content)
         print("Манифест очищен.")
-    else:
-        print("Проблем не найдено.")
 
 if __name__ == "__main__":
     fix_manifest("tiktok_workspace")
