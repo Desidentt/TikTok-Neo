@@ -10,7 +10,7 @@ def fix_manifest(workspace_dir):
     with open(manifest_path, 'r', encoding='utf-8') as f:
         content = f.read()
 
-    # Полностью удаляем атрибут и его значение (например, android:resource="@123456")
+    # Удаляет проблемный атрибут целиком: android:xxx="@123456"
     pattern = r'\s+[\w:]+="@\d+"'
     
     matches = re.findall(pattern, content)
