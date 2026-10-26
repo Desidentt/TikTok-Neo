@@ -54,7 +54,6 @@ jobs:
       run: |
         APKSIGNER_PATH=$(find $ANDROID_HOME/build-tools -name apksigner | sort -r | head -n 1)
         
-        # Подписываем напрямую, apksigner сам сделает нужное выравнивание для v2/v3
         $APKSIGNER_PATH sign \
           --ks release.keystore \
           --ks-pass pass:123456 \
