@@ -43,7 +43,7 @@ jobs:
 
     - name: Generate Keystore
       run: |
-        # ВАЖНО: создаем ключ в формате JKS (иначе nkstool не сможет его прочитать)
+        # Создаем ключ в формате JKS, чтобы nkstool мог его прочитать
         keytool -genkey -v -keystore release.keystore -alias test -keyalg RSA -keysize 2048 -validity 10000 -storepass 123456 -keypass 123456 -dname "CN=TikTok Neo, O=Modding, C=US" -storetype JKS
 
     - name: Run Build Script
@@ -73,13 +73,15 @@ jobs:
         
         wget https://github.com/L-JINBIN/ApkSignatureKiller/raw/master/nkstool.jar
         
-        # Создаем config.txt с нуля, чтобы избежать проблем с комментариями
-        echo "apk=src.apk" > config.txt
-        echo "out=out.apk" >> config.txt
-        echo "keystore=test.keystore" >> config.txt
-        echo "storepass=123456" >> config.txt
-        echo "alias=test" >> config.txt
-        echo "keypass=123456" >> config.txt
+        # Создаем config.txt с нуля через cat (это 100% безопасно от ошибок форматирования)
+        cat << 'EOF' > config.txt
+apk=src.apk
+out=out.apk
+keystore=test.keystore
+storepass=123456
+alias=test
+keypass=123456
+EOF
         
         # Запускаем nkstool
         java \
