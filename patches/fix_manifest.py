@@ -11,17 +11,11 @@ def fix_manifest(workspace_dir):
     with open(manifest_path, 'r', encoding='utf-8') as f:
         content = f.read()
 
-    # Регулярное выражение для поиска атрибутов со значением вида "@123456789"
-    # и их удаления (замены на пустую строку).
-    # Пример: android:resource="@1292435456" -> ""
-    pattern = r'\s+[\w:]+="@\d+"'
-    
-    # Считаем количество совпадений для отчёта
+    pattern = r'(=")@\d+(")'
     matches = re.findall(pattern, content)
     if matches:
-        print(f"Найдено {len(matches)} проблемных атрибутов. Удаляем...")
-        # Удаляем все совпадения
-        content = re.sub(pattern, '', content)
+        print(f"Найдено {len(matches)} проблемных атрибутов. Заменяем на @null...")
+        content = re.sub(pattern, r'\1@null\2', content)
         
         with open(manifest_path, 'w', encoding='utf-8') as f:
             f.write(content)
