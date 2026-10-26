@@ -70,15 +70,8 @@ jobs:
         
         wget https://github.com/L-JINBIN/ApkSignatureKiller/raw/master/nkstool.jar
         
-        # Создаем config.txt с нашими данными от release.keystore
-        cat <<EOF > config.txt
-        apk=src.apk
-        out=out.apk
-        keystore=release.keystore
-        storepass=123456
-        alias=neo
-        keypass=123456
-        EOF
+        # Создаем config.txt БЕЗ лишних пробелов (используем printf)
+        printf "apk=src.apk\nout=out.apk\nkeystore=release.keystore\nstorepass=123456\nalias=neo\nkeypass=123456\n" > config.txt
         
         # Запускаем nkstool с флагами доступа к JDK
         java \
@@ -90,7 +83,7 @@ jobs:
           --add-opens java.base/java.io=ALL-UNNAMED \
           -jar nkstool.jar
         
-        # Ищем результат работы (теперь это out.apk)
+        # Ищем результат работы (утилита пишет в out.apk)
         if [ -f "out.apk" ]; then
           mv out.apk TikTok_Neo_Patched.apk
           echo "Успешно применен патч подписи!"
