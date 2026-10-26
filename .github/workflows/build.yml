@@ -49,15 +49,17 @@ jobs:
         chmod +x scripts/build.sh
         ./scripts/build.sh
 
-    - name: Download APKpatcher
+    - name: Bypass Signature Verification (nkstool)
       run: |
-        git clone https://github.com/Anon4You/APKpatcher.git apkpatcher_tool
-
-    - name: Bypass Signature Verification (APKpatcher)
-      run: |
-        chmod +x apkpatcher_tool/APKpatcher.sh
-        # Патчим собранный APK для обхода проверки подписи
-        ./apkpatcher_tool/APKpatcher.sh --bypass TikTok_Neo_Unsigned.apk
+        # Скачиваем nkstool.jar и config.txt из репозитория ApkSignatureKiller
+        wget https://github.com/L-JINBIN/ApkSignatureKiller/raw/master/nkstool.jar
+        wget https://github.com/L-JINBIN/ApkSignatureKiller/raw/master/config.txt
+        
+        # В config.txt указываем наш APK (он должен лежать в корне)
+        sed -i 's/^apk=.*/apk=TikTok_Neo_Unsigned.apk/' config.txt
+        
+        # Запускаем nkstool
+        java -jar nkstool.jar
 
     - name: Zipalign APK
       run: |
