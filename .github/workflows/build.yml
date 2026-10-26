@@ -32,6 +32,9 @@ jobs:
         keytool -genkey -v -keystore release.keystore -alias neo -keyalg RSA -keysize 2048 -validity 10000 -storepass 123456 -keypass 123456 -dname "CN=TikTok Neo, O=Modding, C=US"
 
     - name: Run Build Script
+      env:
+        # Увеличиваем лимит памяти до 4 ГБ для apktool
+        APKTOOL_JAVA_OPTS: "-Xmx4G -Dfile.encoding=utf-8"
       run: |
         chmod +x scripts/build.sh
         ./scripts/build.sh
