@@ -6,7 +6,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 120 # Увеличенный таймаут для долгой сборки
+    timeout-minutes: 120
 
     steps:
     - name: Checkout code
@@ -25,12 +25,10 @@ jobs:
 
     - name: Download latest Apktool
       run: |
-        # Скачиваем свежую версию apktool (2.9.3)
         wget https://github.com/iBotPeaches/Apktool/releases/download/v2.9.3/apktool_2.9.3.jar -O apktool.jar
 
     - name: Increase Swap Space
       run: |
-        # Увеличиваем файл подкачки до 10 ГБ для предотвращения ошибки OutOfMemory
         sudo swapoff -a
         sudo fallocate -l 10G /swapfile
         sudo chmod 600 /swapfile
@@ -40,12 +38,11 @@ jobs:
 
     - name: Download original TikTok APK
       run: |
-        # ВСТАВЬ СЮДА СВОЮ ССЫЛКУ ИЗ РАЗДЕЛА RELEASES!
+        # ВСТАВЬ СЮДА СВОЮ ССЫЛКУ!
         wget -O original.apk "https://github.com/Desidentt/TikTok-Neo/releases/download/v1.0/original.apk"
 
     - name: Generate Keystore
       run: |
-        # Генерируем ключ подписи прямо на сервере
         keytool -genkey -v -keystore release.keystore -alias neo -keyalg RSA -keysize 2048 -validity 10000 -storepass 123456 -keypass 123456 -dname "CN=TikTok Neo, O=Modding, C=US"
 
     - name: Run Build Script
@@ -53,20 +50,27 @@ jobs:
         chmod +x scripts/build.sh
         ./scripts/build.sh
 
-    - name: Sign APK
+    - name: Zipalign APK
       run: |
-        # Ищем утилиту apksigner в папке Android SDK
+        zipalign -v 4 TikTok_Neo_Unsigned.apk TikTok_Neo_Aligned.apk
+
+    - name: Sign APK (v1, v2, v3)
+      run: |
         APKSIGNER_PATH=$(find $ANDROID_HOME/build-tools -name apksigner | sort -r | head -n 1)
-        
         if [ -z "$APKSIGNER_PATH" ]; then
-          echo "Ошибка: apksigner не найден в Android SDK!"
+          echo "Ошибка: apksigner не найден!"
           exit 1
         fi
         
-        echo "Используется apksigner: $APKSIGNER_PATH"
-        
-        # Запускаем подпись
-        $APKSIGNER_PATH sign --ks release.keystore --ks-pass pass:123456 --key-pass pass:123456 --ks-key-alias neo --out TikTok_Neo_Signed.apk TikTok_Neo_Aligned.apk
+        $APKSIGNER_PATH sign \
+          --ks release.keystore \
+          --ks-pass pass:123456 \
+          --key-pass pass:123456 \
+          --ks-key-alias neo \
+          --v1-signing-enabled true \
+          --v2-signing-enabled true \
+          --v3-signing-enabled true \
+          --out TikTok_Neo_Signed.apk TikTok_Neo_Aligned.apk
 
     - name: Upload APK and Keystore
       uses: actions/upload-artifact@v4
