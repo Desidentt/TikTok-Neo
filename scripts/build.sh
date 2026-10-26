@@ -1,8 +1,13 @@
 #!/bin/bash
 set -e
 
-# Указываем путь к jar-файлу apktool (обычно он находится здесь)
-APKTOOL_JAR="/usr/share/java/apktool.jar"
+# Автоматически находим путь к apktool.jar
+APKTOOL_JAR=$(find / -name "apktool.jar" 2>/dev/null | head -n 1)
+if [ -z "$APKTOOL_JAR" ]; then
+    echo "Ошибка: apktool.jar не найден!"
+    exit 1
+fi
+echo "Используется apktool: $APKTOOL_JAR"
 
 echo "1. Распаковываем оригинальный TikTok..."
 java -Xmx8G -jar "$APKTOOL_JAR" d original.apk -o tiktok_workspace -f
