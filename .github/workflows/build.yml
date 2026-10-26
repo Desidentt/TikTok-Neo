@@ -68,17 +68,20 @@ jobs:
         # nkstool ищет src.apk
         mv TikTok_Neo_PreSigned.apk src.apk
         
-        # Скачиваем утилиту и оригинальный конфиг
-        wget https://github.com/L-JINBIN/ApkSignatureKiller/raw/master/nkstool.jar
-        wget https://github.com/L-JINBIN/ApkSignatureKiller/raw/master/config.txt
+        # ВАЖНО: nkstool по умолчанию ищет test.keystore. Копируем наш ключ, чтобы обмануть утилиту.
+        cp release.keystore test.keystore
         
-        # Модифицируем конфиг: меняем тестовые данные на наши (release.keystore)
-        sed -i 's/^apk=.*/apk=src.apk/' config.txt
-        sed -i 's/^out=.*/out=out.apk/' config.txt
-        sed -i 's/^keystore=.*/keystore=release.keystore/' config.txt
-        sed -i 's/^alias=.*/alias=neo/' config.txt
-        sed -i 's/^storepass=.*/storepass=123456/' config.txt
-        sed -i 's/^keypass=.*/keypass=123456/' config.txt
+        # Скачиваем утилиту
+        wget https://github.com/L-JINBIN/ApkSignatureKiller/raw/master/nkstool.jar
+        
+        # Создаем конфиг построчно (это 100% безопасно от ошибок форматирования)
+        echo "apk=src.apk" > config.txt
+        echo "out=out.apk" >> config.txt
+        # На всякий случай прописываем и наши ключи
+        echo "keystore=test.keystore" >> config.txt
+        echo "storepass=123456" >> config.txt
+        echo "alias=neo" >> config.txt
+        echo "keypass=123456" >> config.txt
         
         # Запускаем nkstool с флагами доступа к JDK
         java \
