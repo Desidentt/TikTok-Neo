@@ -19,7 +19,7 @@ done
 echo "4. Применяем патчи Smali..."
 python3 patches/remove_ads.py
 
-echo "4.5. ИСПРАВЛЯЕМ битые PNG файлы (заменяем на валидные)..."
+echo "4.5. ИСПРАВЛЯЕМ битые PNG файлы..."
 python3 patches/fix_png.py
 
 echo "4.6. ИСПРАВЛЯЕМ битые XML файлы..."
