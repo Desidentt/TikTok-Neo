@@ -19,13 +19,13 @@ done
 echo "4. Применяем патчи Smali..."
 python3 patches/remove_ads.py
 
-echo "4.5. Удаляем битые PNG файлы (а не заменяем их)..."
+echo "4.5. ИСПРАВЛЯЕМ битые PNG файлы (заменяем на валидные)..."
 python3 patches/fix_png.py
 
-echo "4.6. Исправляем битые XML файлы..."
+echo "4.6. ИСПРАВЛЯЕМ битые XML файлы..."
 python3 patches/fix_xml.py
 
-echo "4.7. Очищаем AndroidManifest.xml..."
+echo "4.7. ОЧИЩАЕМ AndroidManifest.xml..."
 python3 patches/fix_manifest.py
 
 echo "5. Собираем APK обратно..."
