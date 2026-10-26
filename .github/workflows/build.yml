@@ -51,15 +51,28 @@ jobs:
 
     - name: Bypass Signature Verification (nkstool)
       run: |
-        # Скачиваем nkstool.jar и config.txt из репозитория ApkSignatureKiller
+        # 1. Переименовываем наш APK в src.apk, как того требует утилита
+        mv TikTok_Neo_Unsigned.apk src.apk
+        
+        # 2. Скачиваем утилиту и конфиг
         wget https://github.com/L-JINBIN/ApkSignatureKiller/raw/master/nkstool.jar
         wget https://github.com/L-JINBIN/ApkSignatureKiller/raw/master/config.txt
         
-        # В config.txt указываем наш APK (он должен лежать в корне)
-        sed -i 's/^apk=.*/apk=TikTok_Neo_Unsigned.apk/' config.txt
-        
-        # Запускаем nkstool
+        # 3. Запускаем утилиту
         java -jar nkstool.jar
+        
+        # 4. Ищем результат (утилита создает файл src_killer.apk или dist.apk)
+        if [ -f "src_killer.apk" ]; then
+          mv src_killer.apk TikTok_Neo_Unsigned.apk
+          echo "Успешно применен src_killer.apk"
+        elif [ -f "dist.apk" ]; then
+          mv dist.apk TikTok_Neo_Unsigned.apk
+          echo "Успешно применен dist.apk"
+        else
+          echo "Ошибка: Выходной файл не найден!"
+          ls -la
+          exit 1
+        fi
 
     - name: Zipalign APK
       run: |
