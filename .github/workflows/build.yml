@@ -43,8 +43,8 @@ jobs:
 
     - name: Generate Keystore
       run: |
-        # ВАЖНО: используем алиас "test", чтобы он совпадал с дефолтным конфигом nkstool
-        keytool -genkey -v -keystore release.keystore -alias test -keyalg RSA -keysize 2048 -validity 10000 -storepass 123456 -keypass 123456 -dname "CN=TikTok Neo, O=Modding, C=US"
+        # ВАЖНО: создаем ключ в формате JKS (иначе nkstool не сможет его прочитать)
+        keytool -genkey -v -keystore release.keystore -alias test -keyalg RSA -keysize 2048 -validity 10000 -storepass 123456 -keypass 123456 -dname "CN=TikTok Neo, O=Modding, C=US" -storetype JKS
 
     - name: Run Build Script
       run: |
@@ -68,20 +68,20 @@ jobs:
       run: |
         mv TikTok_Neo_PreSigned.apk src.apk
         
-        # Создаем копию ключа с именем test.keystore
+        # Копируем ключ под именем, которое ищет утилита
         cp release.keystore test.keystore
         
         wget https://github.com/L-JINBIN/ApkSignatureKiller/raw/master/nkstool.jar
-        wget https://github.com/L-JINBIN/ApkSignatureKiller/raw/master/config.txt
         
-        # Заменяем строки, даже если они закомментированы (^#*)
-        sed -i 's/^#*apk=.*/apk=src.apk/' config.txt
-        sed -i 's/^#*out=.*/out=out.apk/' config.txt
-        sed -i 's/^#*keystore=.*/keystore=test.keystore/' config.txt
-        sed -i 's/^#*storepass=.*/storepass=123456/' config.txt
-        sed -i 's/^#*alias=.*/alias=test/' config.txt
-        sed -i 's/^#*keypass=.*/keypass=123456/' config.txt
+        # Создаем config.txt с нуля, чтобы избежать проблем с комментариями
+        echo "apk=src.apk" > config.txt
+        echo "out=out.apk" >> config.txt
+        echo "keystore=test.keystore" >> config.txt
+        echo "storepass=123456" >> config.txt
+        echo "alias=test" >> config.txt
+        echo "keypass=123456" >> config.txt
         
+        # Запускаем nkstool
         java \
           --add-exports java.base/sun.security.pkcs=ALL-UNNAMED \
           --add-exports java.base/sun.security.x509=ALL-UNNAMED \
