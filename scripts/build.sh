@@ -1,10 +1,11 @@
 #!/bin/bash
 set -e
 
-# Автоматически находим путь к apktool.jar
-APKTOOL_JAR=$(find / -name "apktool.jar" 2>/dev/null | head -n 1)
-if [ -z "$APKTOOL_JAR" ]; then
-    echo "Ошибка: apktool.jar не найден!"
+# Указываем, что apktool.jar лежит прямо в корне проекта
+APKTOOL_JAR="apktool.jar"
+
+if [ ! -f "$APKTOOL_JAR" ]; then
+    echo "Ошибка: файл $APKTOOL_JAR не найден в текущей папке!"
     exit 1
 fi
 echo "Используется apktool: $APKTOOL_JAR"
