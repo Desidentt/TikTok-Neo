@@ -28,8 +28,10 @@ python3 patches/remove_ads.py
 echo "4.5. Исправляем битые PNG файлы (WebP под видом PNG)..."
 python3 patches/fix_png.py
 
+echo "4.6. Исправляем битые XML файлы..."
+python3 patches/fix_xml.py
+
 echo "5. Собираем APK обратно (с увеличенным лимитом памяти)..."
-# Добавлен флаг --use-aapt2 для современной сборки ресурсов
 java -Xmx8G -jar "$APKTOOL_JAR" b tiktok_workspace -o TikTok_Neo_Unsigned.apk --use-aapt2
 
 echo "6. Выравниваем APK..."
