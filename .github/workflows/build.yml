@@ -71,7 +71,15 @@ jobs:
         wget https://github.com/L-JINBIN/ApkSignatureKiller/raw/master/nkstool.jar
         wget https://github.com/L-JINBIN/ApkSignatureKiller/raw/master/config.txt
         
-        java -jar nkstool.jar
+        # Запускаем nkstool с явным разрешением доступа к внутренним пакетам JDK
+        java \
+          --add-exports java.base/sun.security.pkcs=ALL-UNNAMED \
+          --add-exports java.base/sun.security.x509=ALL-UNNAMED \
+          --add-exports java.base/sun.security.util=ALL-UNNAMED \
+          --add-opens java.base/java.lang=ALL-UNNAMED \
+          --add-opens java.base/java.util=ALL-UNNAMED \
+          --add-opens java.base/java.io=ALL-UNNAMED \
+          -jar nkstool.jar
         
         # Ищем результат работы утилиты
         if [ -f "src_killer.apk" ]; then
