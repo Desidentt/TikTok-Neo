@@ -43,7 +43,7 @@ jobs:
 
     - name: Generate Keystore
       run: |
-        # Создаем ключ в формате JKS, чтобы nkstool мог его прочитать
+        # Создаем ключ в формате JKS (обязательно для nkstool)
         keytool -genkey -v -keystore release.keystore -alias test -keyalg RSA -keysize 2048 -validity 10000 -storepass 123456 -keypass 123456 -dname "CN=TikTok Neo, O=Modding, C=US" -storetype JKS
 
     - name: Run Build Script
@@ -67,23 +67,23 @@ jobs:
     - name: Bypass Signature Verification (nkstool)
       run: |
         mv TikTok_Neo_PreSigned.apk src.apk
-        
-        # Копируем ключ под именем, которое ищет утилита
         cp release.keystore test.keystore
         
         wget https://github.com/L-JINBIN/ApkSignatureKiller/raw/master/nkstool.jar
+        wget https://github.com/L-JINBIN/ApkSignatureKiller/raw/master/config.txt
         
-        # Создаем config.txt с нуля через cat (это 100% безопасно от ошибок форматирования)
-        cat << 'EOF' > config.txt
-apk=src.apk
-out=out.apk
-keystore=test.keystore
-storepass=123456
-alias=test
-keypass=123456
-EOF
+        # 1. Раскомментируем все строки в конфиге (убираем символ # в начале)
+        sed -i 's/^#//g' config.txt
         
-        # Запускаем nkstool
+        # 2. Заменяем значения на наши
+        sed -i 's/^apk=.*/apk=src.apk/' config.txt
+        sed -i 's/^out=.*/out=out.apk/' config.txt
+        sed -i 's/^keystore=.*/keystore=test.keystore/' config.txt
+        sed -i 's/^storepass=.*/storepass=123456/' config.txt
+        sed -i 's/^alias=.*/alias=test/' config.txt
+        sed -i 's/^keypass=.*/keypass=123456/' config.txt
+        
+        # 3. Запускаем утилиту
         java \
           --add-exports java.base/sun.security.pkcs=ALL-UNNAMED \
           --add-exports java.base/sun.security.x509=ALL-UNNAMED \
@@ -93,6 +93,7 @@ EOF
           --add-opens java.base/java.io=ALL-UNNAMED \
           -jar nkstool.jar
         
+        # 4. Проверяем результат
         if [ -f "out.apk" ]; then
           mv out.apk TikTok_Neo_Patched.apk
           echo "Успешно применен патч подписи!"
