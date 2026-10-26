@@ -15,7 +15,6 @@ def fix_xml_files(directory):
     if os.path.exists(target_file):
         with open(target_file, 'w', encoding='utf-8') as f:
             f.write(valid_xml)
-        print(f"Исправлен битый XML: {target_file}")
 
 if __name__ == "__main__":
     fix_xml_files("tiktok_workspace/res")
