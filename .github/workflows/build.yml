@@ -52,8 +52,8 @@ jobs:
 
     - name: Patch with LSPatch (Bypass Signature)
       run: |
-        # Используем локальный lspatch.jar, загруженный в репозиторий
-        java -jar lspatch.jar TikTok_Neo_Unsigned.apk \
+        # Используем ТОЧНОЕ имя файла из твоего репозитория
+        java -jar lspatch-v1.2-487-release.jar TikTok_Neo_Unsigned.apk \
           -d \
           --bypass-signature-check \
           -o TikTok_Neo_Patched.apk
@@ -62,7 +62,6 @@ jobs:
 
     - name: Final Sign APK
       run: |
-        # Удаляем старые подписи (если LSPatch что-то оставил)
         zip -d TikTok_Neo_Patched.apk "META-INF/*" || true
         
         APKSIGNER_PATH=$(find $ANDROID_HOME/build-tools -name apksigner | sort -r | head -n 1)
