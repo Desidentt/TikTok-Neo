@@ -64,21 +64,17 @@ jobs:
           --v3-signing-enabled false \
           --out TikTok_Neo_PreSigned.apk TikTok_Neo_Unsigned.apk
 
-    # --- ОБНОВЛЕННЫЙ ШАГ LSPatch: подаем на вход уже подписанный APK ---
     - name: Patch with LSPatch (Bypass Signature)
       run: |
-        # Используем предварительно подписанный APK, чтобы LSPatch мог прочитать подпись
+        # Пробуем уровень 2 вместо 3
         java -jar lspatch-v1.2-487-release.jar \
-          -l 3 \
+          -l 2 \
           -o lspatch_output \
           TikTok_Neo_PreSigned.apk
         
-        # Забираем результат
         if [ -d "lspatch_output" ]; then
           mv lspatch_output/*.apk TikTok_Neo_Patched.apk
-          echo "LSPatch успешно применил патч обхода подписи!"
         else
-          echo "Ошибка: папка lspatch_output не создана!"
           exit 1
         fi
 
