@@ -50,11 +50,10 @@ jobs:
         chmod +x scripts/build.sh
         ./scripts/build.sh
 
-    # --- ИСПОЛЬЗУЕМ LSPatch ВМЕСТО NKSTOOL ---
     - name: Patch with LSPatch (Bypass Signature)
       run: |
-        # 1. Скачиваем LSPatch CLI
-        wget https://github.com/JingMatrix/LSPatch/releases/latest/download/lspatch.jar -O lspatch.jar
+        # 1. Скачиваем LSPatch CLI из актуального репозитория JingMatrix (стабильная версия v1.2)
+        wget https://github.com/JingMatrix/LSPatch/releases/download/v1.2/lspatch.jar -O lspatch.jar
         
         # 2. Запускаем LSPatch для обхода проверки подписи
         # Флаг -d означает "не декодировать ресурсы", --bypass-signature-check включает обход
