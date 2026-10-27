@@ -52,13 +52,13 @@ jobs:
 
     - name: Patch with LSPatch (Bypass Signature)
       run: |
-        # Сначала идут все флаги, в конце - имя APK
+        # Используем флаг -p для применения патча обхода подписи
         java -jar lspatch-v1.2-487-release.jar \
-          --bypass-signature-check \
+          -p bypass-signature-check \
           -o lspatch_output \
           TikTok_Neo_Unsigned.apk
         
-        # LSPatch создает папку lspatch_output и кладет туда пропатченный файл
+        # Забираем результат
         if [ -d "lspatch_output" ]; then
           mv lspatch_output/*.apk TikTok_Neo_Patched.apk
           echo "LSPatch успешно применил патч обхода подписи!"
