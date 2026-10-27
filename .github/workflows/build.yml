@@ -50,7 +50,6 @@ jobs:
         chmod +x scripts/build.sh
         ./scripts/build.sh
 
-    # --- НОВЫЙ ШАГ: Подписываем APK перед LSPatch (с включенной v1 схемой) ---
     - name: Pre-sign APK for LSPatch (v1 enabled)
       run: |
         APKSIGNER_PATH=$(find $ANDROID_HOME/build-tools -name apksigner | sort -r | head -n 1)
@@ -64,17 +63,19 @@ jobs:
           --v3-signing-enabled false \
           --out TikTok_Neo_PreSigned.apk TikTok_Neo_Unsigned.apk
 
-    - name: Patch with LSPatch (Bypass Signature)
+    - name: Patch with LSPatch (Level 3)
       run: |
-        # Пробуем уровень 2 вместо 3
-        java -jar lspatch-v1.2-487-release.jar \
-          -l 2 \
+        # ВАЖНО: lspatch.jar должен лежать в корне репозитория!
+        java -jar lspatch.jar \
+          -l 3 \
           -o lspatch_output \
           TikTok_Neo_PreSigned.apk
         
         if [ -d "lspatch_output" ]; then
           mv lspatch_output/*.apk TikTok_Neo_Patched.apk
+          echo "LSPatch успешно применен (уровень 3)!"
         else
+          echo "Ошибка: lspatch_output не создана!"
           exit 1
         fi
 
@@ -91,13 +92,11 @@ jobs:
           --v1-signing-enabled true \
           --v2-signing-enabled true \
           --v3-signing-enabled true \
-          --min-sdk-version 23 \
+          --min-sdk-version 28 \
           --out TikTok_Neo_Signed.apk TikTok_Neo_Patched.apk
 
-    - name: Upload APK and Keystore
+    - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: TikTok-Neo-Files
-        path: |
-          TikTok_Neo_Signed.apk
-          release.keystore
+        name: TikTok-Neo-Final
+        path: TikTok_Neo_Signed.apk
