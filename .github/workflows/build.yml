@@ -43,8 +43,11 @@ jobs:
 
     - name: Generate Keystore
       run: |
-        # Создаем ключ в формате JKS (обязательно для nkstool)
         keytool -genkey -v -keystore release.keystore -alias test -keyalg RSA -keysize 2048 -validity 10000 -storepass 123456 -keypass 123456 -dname "CN=TikTok Neo, O=Modding, C=US" -storetype JKS
+        
+        # Диагностика: проверяем, что ключ создан правильно
+        echo "=== Keystore info ==="
+        keytool -list -v -keystore release.keystore -storepass 123456 2>&1 | head -30
 
     - name: Run Build Script
       run: |
@@ -70,20 +73,16 @@ jobs:
         cp release.keystore test.keystore
         
         wget https://github.com/L-JINBIN/ApkSignatureKiller/raw/master/nkstool.jar
-        wget https://github.com/L-JINBIN/ApkSignatureKiller/raw/master/config.txt
         
-        # 1. Раскомментируем все строки в конфиге (убираем символ # в начале)
-        sed -i 's/^#//g' config.txt
+        # Создаем конфиг через printf (100% чисто, без пробелов)
+        printf 'apk=src.apk\nout=out.apk\nkeystore=test.keystore\nstorepass=123456\nalias=test\nkeypass=123456\n' > config.txt
         
-        # 2. Заменяем значения на наши
-        sed -i 's/^apk=.*/apk=src.apk/' config.txt
-        sed -i 's/^out=.*/out=out.apk/' config.txt
-        sed -i 's/^keystore=.*/keystore=test.keystore/' config.txt
-        sed -i 's/^storepass=.*/storepass=123456/' config.txt
-        sed -i 's/^alias=.*/alias=test/' config.txt
-        sed -i 's/^keypass=.*/keypass=123456/' config.txt
+        echo "=== Config content ==="
+        cat config.txt
+        echo "==================="
         
-        # 3. Запускаем утилиту
+        # Запускаем nkstool. || true позволяет продолжить, даже если подпись упадет
+        # (out.apk создается ДО подписи, поэтому он нам все равно нужен)
         java \
           --add-exports java.base/sun.security.pkcs=ALL-UNNAMED \
           --add-exports java.base/sun.security.x509=ALL-UNNAMED \
@@ -91,20 +90,23 @@ jobs:
           --add-opens java.base/java.lang=ALL-UNNAMED \
           --add-opens java.base/java.util=ALL-UNNAMED \
           --add-opens java.base/java.io=ALL-UNNAMED \
-          -jar nkstool.jar
+          -jar nkstool.jar || echo "nkstool завершил работу с ошибкой, но out.apk мог быть создан"
         
-        # 4. Проверяем результат
         if [ -f "out.apk" ]; then
           mv out.apk TikTok_Neo_Patched.apk
-          echo "Успешно применен патч подписи!"
+          echo "Патченный APK готов!"
+          ls -la TikTok_Neo_Patched.apk
         else
-          echo "Ошибка: Выходной файл out.apk не найден!"
+          echo "Ошибка: out.apk не был создан!"
           ls -la
           exit 1
         fi
 
     - name: Final Sign APK
       run: |
+        # Удаляем старые подписи (если nkstool успел что-то оставить)
+        zip -d TikTok_Neo_Patched.apk "META-INF/*" || true
+        
         APKSIGNER_PATH=$(find $ANDROID_HOME/build-tools -name apksigner | sort -r | head -n 1)
         $APKSIGNER_PATH sign \
           --ks release.keystore \
