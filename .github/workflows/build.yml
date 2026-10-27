@@ -52,9 +52,9 @@ jobs:
 
     - name: Patch with LSPatch (Bypass Signature)
       run: |
-        # Используем флаг -p для применения патча обхода подписи
+        # Используем -l 3 для максимального уровня обхода подписи
         java -jar lspatch-v1.2-487-release.jar \
-          -p bypass-signature-check \
+          -l 3 \
           -o lspatch_output \
           TikTok_Neo_Unsigned.apk
         
