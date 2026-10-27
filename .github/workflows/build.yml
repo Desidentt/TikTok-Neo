@@ -52,11 +52,7 @@ jobs:
 
     - name: Patch with LSPatch (Bypass Signature)
       run: |
-        # 1. Скачиваем LSPatch CLI из актуального репозитория JingMatrix (стабильная версия v1.2)
-        wget https://github.com/JingMatrix/LSPatch/releases/download/v1.2/lspatch.jar -O lspatch.jar
-        
-        # 2. Запускаем LSPatch для обхода проверки подписи
-        # Флаг -d означает "не декодировать ресурсы", --bypass-signature-check включает обход
+        # Используем локальный lspatch.jar, загруженный в репозиторий
         java -jar lspatch.jar TikTok_Neo_Unsigned.apk \
           -d \
           --bypass-signature-check \
